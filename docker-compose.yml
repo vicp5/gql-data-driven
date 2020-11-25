@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+
+  gql-db:
+    image: mysql:latest
+    container_name: gql-db
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${APP_DB_PWD}
+      MYSQL_DATABASE: ${APP_DB_NAME}
+    ports:
+      - 3306:3306
+    volumes:
+      - ./initial.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+
+  rust-be:
+    build: ./rust-be
+    container_name: rust-be
+    depends_on:
+      - gql-db
+    restart: on-failure
+    environment:
+      DATABASE_URL: mysql://root:${APP_DB_PWD}@gql-db/${APP_DB_NAME}
+    ports:
+      - 8080:8080
+
+  apollo-fe:
+    build: ./apollo-fe
+    container_name: apollo-fe
+    depends_on:
+      - rust-be
+    environment:
+      SERVER_URL: http://localhost:8080
+    ports:
+      - 3000:3000
+
+  relay-fe:
+    build: ./relay-fe
+    container_name: relay-fe
+    depends_on:
+      - rust-be
+    environment:
+      SERVER_URL: http://localhost:8080
+    ports:
+      - 3001:3000
