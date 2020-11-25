@@ -1,0 +1,53 @@
+schema {
+  query: QueryRoot
+  mutation: MutationRoot
+}
+
+type Author {
+  id: String!
+  name: String!
+  books: [Book!]!
+}
+
+type Book {
+  id: String!
+  authorId: String!
+  name: String!
+  price: Float!
+  status: String!
+  author: Author
+}
+
+type MutationRoot {
+  """Create new author"""
+  createAuthor(author: NewAuthor!): Author!
+
+  """Create a new book"""
+  createBook(book: NewBook!): Book!
+}
+
+"""An author"""
+input NewAuthor {
+  name: String!
+}
+
+"""A book"""
+input NewBook {
+  authorId: String!
+  name: String!
+  price: Float!
+}
+
+type QueryRoot {
+  """List of all authors"""
+  authors: [Author!]!
+
+  """Get an author by ID"""
+  author(id: String!): Author!
+
+  """List of all books"""
+  books: [Book!]!
+
+  """Get a book by ID"""
+  book(id: String!): Book!
+}
